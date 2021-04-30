@@ -28,7 +28,7 @@ Resources:
         Properties:
             Handler: retrieve-achievements.default
             Runtime: nodejs10.x
-            Timeout: 30
+            Timeout: 60
             MemorySize: 128
             CodeUri: ./dist/retrieve-achievements
             Policies:
@@ -74,7 +74,7 @@ Resources:
             Runtime: nodejs10.x
             CodeUri: ./dist/process-save-achievements
             MemorySize: 128
-            ReservedConcurrentExecutions: 1
+            ReservedConcurrentExecutions: 5
             Policies:
                 - AWSLambdaVPCAccessExecutionRole
                 - SecretsManagerReadWrite

@@ -4,10 +4,8 @@ import { getConnection } from './db/rds';
 
 export default async (event): Promise<any> => {
 	const mysql = await getConnection();
-	console.log('input', JSON.stringify(event));
 	const escape = SqlString.escape;
 	const userInfo = JSON.parse(event.body);
-	console.log('getting stats for user', userInfo);
 
 	const uniqueIdentifiersQuery = `
 			SELECT DISTINCT userName, userId 
@@ -34,7 +32,6 @@ export default async (event): Promise<any> => {
 			GROUP BY achievementId
 			ORDER BY achievementId
 		`;
-	console.log('running query', query);
 	const allAchievements: readonly any[] = await mysql.query(query);
 	const results: readonly CompletedAchievement[] = allAchievements.map(result =>
 		Object.assign(new CompletedAchievement(), {
@@ -47,11 +44,9 @@ export default async (event): Promise<any> => {
 		results.filter(ach => ach.id.indexOf('global_mana_spent_') !== -1),
 	);
 	await mysql.end();
-	// console.log('results', results);
 
 	const stringResults = JSON.stringify({ results });
 	const gzippedResults = gzipSync(stringResults).toString('base64');
-	console.log('compressed', stringResults.length, gzippedResults.length);
 	const response = {
 		statusCode: 200,
 		isBase64Encoded: true,
@@ -61,7 +56,6 @@ export default async (event): Promise<any> => {
 			'Content-Encoding': 'gzip',
 		},
 	};
-	// console.log('sending back success reponse');
 	return response;
 };
 
