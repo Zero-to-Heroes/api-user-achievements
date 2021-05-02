@@ -5,14 +5,15 @@ import { getConnection } from './db/rds';
 export default async (event): Promise<any> => {
 	const mysql = await getConnection();
 	const escape = SqlString.escape;
-	const userInfo = JSON.parse(event.body);
+	const input = JSON.parse(event.body);
 
 	const uniqueIdentifiersQuery = `
-			SELECT DISTINCT userName, userId 
-			FROM achievement_stat
-			WHERE userName = ${escape(userInfo.userName || '__invalid__')}
-				OR userId = ${escape(userInfo.userId || '__invalid__')}
-		`;
+		SELECT DISTINCT userId, userName
+		FROM user_mapping
+		WHERE 
+			userId = ${escape(input.userId)} 
+			OR userName = ${input.userName ? escape(input.userName) : escape('__invalid__')}
+	`;
 	const uniqueIdentifiers: readonly any[] = await mysql.query(uniqueIdentifiersQuery);
 
 	const userNamesCondition = uniqueIdentifiers.map(id => "'" + id.userName + "'").join(',');
@@ -26,23 +27,24 @@ export default async (event): Promise<any> => {
 	}
 
 	const query = `
-			SELECT achievementId, max(numberOfCompletions) AS numberOfCompletions 
-			FROM achievement_stat
-			WHERE userName in (${userNamesCondition}) OR userId in (${userIdCondition})
-			GROUP BY achievementId
-			ORDER BY achievementId
-		`;
+		SELECT DISTINCT achievementId
+		FROM achievement_stat
+		WHERE 
+			userName in (${userNamesCondition}) 
+			OR userId in (${userIdCondition})
+		ORDER BY achievementId
+	`;
 	const allAchievements: readonly any[] = await mysql.query(query);
 	const results: readonly CompletedAchievement[] = allAchievements.map(result =>
 		Object.assign(new CompletedAchievement(), {
 			id: result.achievementId,
-			numberOfCompletions: result.numberOfCompletions,
+			numberOfCompletions: 1,
 		} as CompletedAchievement),
 	);
-	console.log(
-		'results',
-		results.filter(ach => ach.id.indexOf('global_mana_spent_') !== -1),
-	);
+	// console.log(
+	// 	'results',
+	// 	results.filter(ach => ach.id.indexOf('global_mana_spent_') !== -1),
+	// );
 	await mysql.end();
 
 	const stringResults = JSON.stringify({ results });

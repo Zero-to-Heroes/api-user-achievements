@@ -28,7 +28,8 @@ Resources:
         Properties:
             Handler: retrieve-achievements.default
             Runtime: nodejs10.x
-            Timeout: 60
+            # ApiGateway timeout is 30
+            Timeout: 29
             MemorySize: 128
             CodeUri: ./dist/retrieve-achievements
             Policies:
