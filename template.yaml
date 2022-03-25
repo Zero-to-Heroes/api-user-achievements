@@ -27,7 +27,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             Handler: retrieve-achievements.default
-            Runtime: nodejs10.x
+            Runtime: nodejs12.x
             # ApiGateway timeout is 30
             Timeout: 29
             MemorySize: 128
@@ -50,7 +50,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             Handler: start-save-achievements.default
-            Runtime: nodejs10.x
+            Runtime: nodejs12.x
             Timeout: 3
             MemorySize: 128
             CodeUri: ./dist/start-save-achievements
@@ -72,7 +72,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             Handler: process-save-achievements.default
-            Runtime: nodejs10.x
+            Runtime: nodejs12.x
             CodeUri: ./dist/process-save-achievements
             MemorySize: 128
             ReservedConcurrentExecutions: 5
