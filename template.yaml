@@ -46,6 +46,25 @@ Resources:
                     Properties:
                         Path: /get/{proxy+}
                         Method: any
+    RetrieveAchievementsFunction2:
+        Type: AWS::Serverless::Function
+        Properties:
+            Handler: retrieve-achievements.default
+            Runtime: nodejs16.x
+            CodeUri: ./dist/retrieve-achievements
+            Timeout: 29
+            MemorySize: 128
+            Policies:
+                - AWSLambdaVPCAccessExecutionRole
+                - AmazonSESFullAccess
+                - AmazonSQSFullAccess
+                - SecretsManagerReadWrite
+                # - arn:aws:iam::478062583808:policy/CloudWatchPolicyForLambda # See https://stackoverflow.com/questions/51166504/disable-cloudwatch-to-monitor-logs-for-lambda-function
+            Tags:
+                LambdaName: api-retrieve-achievements-2
+            AutoPublishAlias: live
+            FunctionUrlConfig:
+                AuthType: NONE
     StartSaveAchievementsFunction:
         Type: AWS::Serverless::Function
         Properties:
@@ -68,6 +87,25 @@ Resources:
                     Properties:
                         Path: /save/{proxy+}
                         Method: any
+    StartSaveAchievementsFunction2:
+        Type: AWS::Serverless::Function
+        Properties:
+            Handler: start-save-achievements.default
+            Runtime: nodejs16.x
+            CodeUri: ./dist/start-save-achievements
+            Timeout: 3
+            MemorySize: 128
+            Policies:
+                - AWSLambdaVPCAccessExecutionRole
+                - AmazonSESFullAccess
+                - AmazonSQSFullAccess
+                - SecretsManagerReadWrite
+                # - arn:aws:iam::478062583808:policy/CloudWatchPolicyForLambda # See https://stackoverflow.com/questions/51166504/disable-cloudwatch-to-monitor-logs-for-lambda-function
+            Tags:
+                LambdaName: api-start-save-achievements-2
+            AutoPublishAlias: live
+            FunctionUrlConfig:
+                AuthType: NONE
     ProcessSaveAchievementsFunction:
         Type: AWS::Serverless::Function
         Properties:
