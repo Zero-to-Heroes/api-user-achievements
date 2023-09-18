@@ -5,13 +5,6 @@ Transform: AWS::Serverless-2016-10-31
 Description: API endpoint for user achievements
 
 Globals:
-    Api:
-        # API Gateway regional endpoints
-        EndpointConfiguration: EDGE
-        Cors:
-            AllowMethods: "'*'"
-            AllowHeaders: "'*'"
-            AllowOrigin: "'*'"
     Function:
         Environment:
             Variables:
@@ -23,29 +16,6 @@ Resources:
         Properties:
             QueueName: deferred-save-achievements-queue
             VisibilityTimeout: 601
-    RetrieveAchievementsFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            Handler: retrieve-achievements.default
-            Runtime: nodejs16.x
-            # ApiGateway timeout is 30
-            Timeout: 29
-            MemorySize: 128
-            CodeUri: ./dist/retrieve-achievements
-            Policies:
-                - AWSLambdaVPCAccessExecutionRole
-                - AmazonSESFullAccess
-                - AmazonSQSFullAccess
-                - SecretsManagerReadWrite
-                # - arn:aws:iam::478062583808:policy/CloudWatchPolicyForLambda # See https://stackoverflow.com/questions/51166504/disable-cloudwatch-to-monitor-logs-for-lambda-function
-            Tags:
-                LambdaName: api-retrieve-achievements
-            Events:
-                SaveAchievementsResource:
-                    Type: Api
-                    Properties:
-                        Path: /get/{proxy+}
-                        Method: any
     RetrieveAchievementsFunction2:
         Type: AWS::Serverless::Function
         Properties:
@@ -65,28 +35,6 @@ Resources:
             AutoPublishAlias: live
             FunctionUrlConfig:
                 AuthType: NONE
-    StartSaveAchievementsFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            Handler: start-save-achievements.default
-            Runtime: nodejs16.x
-            Timeout: 3
-            MemorySize: 128
-            CodeUri: ./dist/start-save-achievements
-            Policies:
-                - AWSLambdaVPCAccessExecutionRole
-                - AmazonSESFullAccess
-                - AmazonSQSFullAccess
-                - SecretsManagerReadWrite
-                # - arn:aws:iam::478062583808:policy/CloudWatchPolicyForLambda # See https://stackoverflow.com/questions/51166504/disable-cloudwatch-to-monitor-logs-for-lambda-function
-            Tags:
-                LambdaName: api-start-save-achievements
-            Events:
-                SaveAchievementsResource:
-                    Type: Api
-                    Properties:
-                        Path: /save/{proxy+}
-                        Method: any
     StartSaveAchievementsFunction2:
         Type: AWS::Serverless::Function
         Properties:
@@ -129,10 +77,3 @@ Resources:
                     Properties:
                         Queue: !GetAtt SaveAchievementsQueue.Arn
                         # BatchSize: 1
-
-Outputs:
-    SaveAchievementsApi:
-        Description: URL to save achievements
-        Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/achievements'
-        Export:
-            Name: SaveAchievementsApi
