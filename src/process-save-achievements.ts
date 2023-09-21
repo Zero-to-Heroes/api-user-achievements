@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import { getConnection } from '@firestone-hs/aws-lambda-utils';
 import { ServerlessMysql } from 'serverless-mysql';
 import SqlString from 'sqlstring';
-import { getConnection } from './db/rds';
 import { Input } from './sqs-event';
 
 export default async (event, context): Promise<any> => {
 	const events: readonly Input[] = (event.Records as any[])
-		.map(event => JSON.parse(event.body))
+		.map((event) => JSON.parse(event.body))
 		.reduce((a, b) => a.concat(b), []);
 
 	const mysql = await getConnection();

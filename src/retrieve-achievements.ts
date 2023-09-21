@@ -1,9 +1,9 @@
+import { getConnectionReadOnly } from '@firestone-hs/aws-lambda-utils';
 import SqlString from 'sqlstring';
 import { gzipSync } from 'zlib';
-import { getConnection } from './db/rds';
 
 export default async (event): Promise<any> => {
-	const mysql = await getConnection();
+	const mysql = await getConnectionReadOnly();
 	const escape = SqlString.escape;
 	const input = JSON.parse(event.body);
 
@@ -24,7 +24,7 @@ export default async (event): Promise<any> => {
 		ORDER BY achievementId
 	`;
 	const allAchievements: readonly any[] = await mysql.query(query);
-	const results: readonly CompletedAchievement[] = allAchievements.map(result =>
+	const results: readonly CompletedAchievement[] = allAchievements.map((result) =>
 		Object.assign(new CompletedAchievement(), {
 			id: result.achievementId,
 			numberOfCompletions: 1,
@@ -70,7 +70,7 @@ const getAllUserIds = async (userId: string, userName: string, mysql): Promise<r
 	console.log('running query', userSelectQuery);
 	const userIds: any[] = await mysql.query(userSelectQuery);
 	console.log('query over', userIds);
-	return userIds.map(result => result.userId);
+	return userIds.map((result) => result.userId);
 };
 
 class CompletedAchievement {
