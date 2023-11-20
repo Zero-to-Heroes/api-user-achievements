@@ -5,6 +5,17 @@ import { gzipSync } from 'zlib';
 export default async (event): Promise<any> => {
 	const mysql = await getConnectionReadOnly();
 	const escape = SqlString.escape;
+	if (!event.body?.length) {
+		return {
+			statusCode: 400,
+			body: null,
+			headers: {
+				'Content-Type': 'text/html',
+				'Content-Encoding': 'gzip',
+			},
+		};
+	}
+
 	const input = JSON.parse(event.body);
 
 	const userIds = await getAllUserIds(input.userId, input.userName, mysql);
