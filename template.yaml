@@ -16,6 +16,9 @@ Resources:
         Properties:
             QueueName: deferred-save-achievements-queue
             VisibilityTimeout: 601
+            Tags:
+                - Key: queue-name
+                  Value: deferred-save-achievements-queue
     RetrieveAchievementsFunction2:
         Type: AWS::Serverless::Function
         Properties:
@@ -64,7 +67,7 @@ Resources:
             Runtime: nodejs18.x
             CodeUri: ./dist/process-save-achievements
             MemorySize: 128
-            ReservedConcurrentExecutions: 5
+            ReservedConcurrentExecutions: 1
             # Layers:
             #     - !Sub "arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:14"
             Policies:
@@ -73,7 +76,7 @@ Resources:
                 - AmazonSESFullAccess
                 - AmazonSQSFullAccess
                 - arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy
-                - arn:aws:iam::478062583808:policy/CloudWatchPolicyForLambda # See https://stackoverflow.com/questions/51166504/disable-cloudwatch-to-monitor-logs-for-lambda-function
+                # - arn:aws:iam::478062583808:policy/CloudWatchPolicyForLambda # See https://stackoverflow.com/questions/51166504/disable-cloudwatch-to-monitor-logs-for-lambda-function
             Tags:
                 LambdaName: process-save-achievements
             Timeout: 60
@@ -82,4 +85,5 @@ Resources:
                     Type: SQS
                     Properties:
                         Queue: !GetAtt SaveAchievementsQueue.Arn
-                        # BatchSize: 1
+                        BatchSize: 10
+                        MaximumBatchingWindowInSeconds: 60

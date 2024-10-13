@@ -9,10 +9,9 @@ export default async (event, context): Promise<any> => {
 		.map((event) => JSON.parse(event.body))
 		.reduce((a, b) => a.concat(b), []);
 
+	console.debug('processing', events.length);
 	const mysql = await getConnection();
-	for (const ev of events) {
-		await processEvent(ev, mysql);
-	}
+	await processEvents(events, mysql);
 	await mysql.end();
 
 	const response = {
@@ -23,37 +22,43 @@ export default async (event, context): Promise<any> => {
 	return response;
 };
 
-const processEvent = async (achievementStat: Input, mysql: ServerlessMysql) => {
+const processEvents = async (achievementStats: readonly Input[], mysql: ServerlessMysql) => {
 	const escape = SqlString.escape;
-	console.debug('handling event', achievementStat);
-	await mysql.query(
-		`
-			INSERT INTO achievement_stat 
-			(
-				achievementId,
-				cardId,
-				creationDate,
-				name,
-				numberOfCompletions,
-				type,
-				userId,
-				userMachineId,
-				userName,
-				reviewId
-			)
-			VALUES
-			(
-				${escape(achievementStat.achievementId)},
-				${escape(achievementStat.cardId)},
-				${escape(achievementStat.creationDate)},
-				${escape(achievementStat.name)},
-				${escape(achievementStat.numberOfCompletions)},
-				${escape(achievementStat.type)},
-				${escape(achievementStat.userId)},
-				${escape(achievementStat.userMachineId)},
-				${escape(achievementStat.userName)},
-				${escape(achievementStat.reviewId)}
-			)
-		`,
-	);
+	// console.debug('handling events');
+
+	const values = achievementStats
+		.map(
+			(stat) => `(
+        ${escape(stat.achievementId)},
+        ${escape(stat.cardId)},
+        ${escape(stat.creationDate)},
+        ${escape(stat.name)},
+        ${escape(stat.numberOfCompletions)},
+        ${escape(stat.type)},
+        ${escape(stat.userId)},
+        ${escape(stat.userMachineId)},
+        ${escape(stat.userName)},
+        ${escape(stat.reviewId)}
+    )`,
+		)
+		.join(',');
+
+	const query = `
+        INSERT INTO achievement_stat 
+        (
+            achievementId,
+            cardId,
+            creationDate,
+            name,
+            numberOfCompletions,
+            type,
+            userId,
+            userMachineId,
+            userName,
+            reviewId
+        )
+        VALUES ${values}
+    `;
+
+	await mysql.query(query);
 };
