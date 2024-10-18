@@ -1,4 +1,4 @@
-import { getConnectionReadOnly } from '@firestone-hs/aws-lambda-utils';
+import { getConnectionProxy } from '@firestone-hs/aws-lambda-utils';
 import SqlString from 'sqlstring';
 import { gzipSync } from 'zlib';
 
@@ -17,7 +17,7 @@ export default async (event): Promise<any> => {
 
 	const input = JSON.parse(event.body);
 
-	const mysql = await getConnectionReadOnly();
+	const mysql = await getConnectionProxy();
 	const userIds = await getAllUserIds(input.userId, input.userName, mysql);
 	if (!userIds?.length) {
 		await mysql.end();
